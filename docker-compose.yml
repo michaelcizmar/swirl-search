@@ -1,0 +1,11 @@
+version: '3'
+ 
+services:
+  app:
+    image: swirl-search:latest
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python swirl.py setup &&
+             python manage.py createsuperuser --email admin@example.com --username admin &&
+             python swirl.py start"
