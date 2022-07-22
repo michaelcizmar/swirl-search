@@ -1,7 +1,7 @@
 '''
 @author:     Sid Probstein
 @contact:    sidprobstein@gmail.com
-@version:    SWIRL Preview3
+@version:    SWIRL 1.x
 '''
 
 # from webbrowser import get
@@ -22,7 +22,7 @@ urlpatterns = [
     path('openapi', get_schema_view(
             title="SWIRL Swagger",
             description="SWIRL API descriptions",
-            version="1.0.0"
+            version="1.1.0"
         ), name='openapi-schema'),
     path('swagger-ui/', TemplateView.as_view(
         template_name='swagger-ui.html',

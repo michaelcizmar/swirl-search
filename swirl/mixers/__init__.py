@@ -1,11 +1,11 @@
 '''
 @author:     Sid Probstein
 @contact:    sidprobstein@gmail.com
-@version:    SWIRL Preview3
+@version:    SWIRL 1.x
 '''
 
-from .round_robin import *
 from .stack import *
 from .relevancy import *
+from .date import *
 
 # Add new SWIRL mixers here

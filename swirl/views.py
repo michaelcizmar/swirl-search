@@ -1,7 +1,7 @@
 '''
 @author:     Sid Probstein
 @contact:    sidprobstein@gmail.com
-@version:    SWIRL Preview3
+@version:    SWIRL 1.x
 '''
 
 import time
@@ -37,7 +37,7 @@ def index(request):
 
 class SearchProviderViewSet(viewsets.ModelViewSet):
     """
-    ##S#W#I#R#L##1#0################################################################
+    ##S#W#I#R#L##1#.#1##############################################################
     API endpoint that allows management of SearchProviders. 
     Use GET to list all objects, POST to create a new one. 
     Add /<id>/ to DELETE, PUT or PATCH objects.
@@ -52,7 +52,7 @@ class SearchProviderViewSet(viewsets.ModelViewSet):
 
 class SearchViewSet(viewsets.ModelViewSet):
     """
-    ##S#W#I#R#L##1#0################################################################
+    ##S#W#I#R#L##1#.#1##############################################################
     API endpoint that allows management of Search objects. 
     Use GET to list all objects, POST to create a new one. 
     Add /<id>/ to DELETE, PUT or PATCH objects.
@@ -75,8 +75,8 @@ class SearchViewSet(viewsets.ModelViewSet):
             new_search.status = 'NEW_SEARCH'
             new_search.save()
             search_task.delay(new_search.id)
-            time.sleep(7)
-            return redirect(f'/swirl/results?search_id={new_search.id}&result_mixer={new_search.result_mixer}')
+            time.sleep(6)
+            return redirect(f'/swirl/results?search_id={new_search.id}')
         # end if
         ########################################
         # handle ?rerun=
@@ -86,16 +86,15 @@ class SearchViewSet(viewsets.ModelViewSet):
         if rerun_id:
             rerun_search = Search.objects.get(id=rerun_id)
             old_results = Result.objects.filter(search_id=rerun_search.id)
-            logger.debug(f"{module_name}: deleting Result objects associated with search {rerun_id}")
+            # to do: instead of deleting, copy the search copy to a new search? 
+            logger.warning(f"{module_name}: deleting Result objects associated with search {rerun_id}")
             for old_result in old_results:
                 old_result.delete()
             rerun_search.status = 'NEW_SEARCH'
-            rerun_search.date_updated = datetime.now()
             rerun_search.save()
             search_task.delay(rerun_search.id)
-            # publish('search_create', {'id': rerun_search.id, 'status': 'NEW_SEARCH'})
-            time.sleep(3)
-            return redirect(f'/swirl/results?search_id={rerun_search.id}&result_mixer={rerun_search.result_mixer}')
+            time.sleep(6)
+            return redirect(f'/swirl/results?search_id={rerun_search.id}')
         # end if        
         ########################################
         # handle ?rescore=
@@ -160,7 +159,7 @@ class SearchViewSet(viewsets.ModelViewSet):
 
 class ResultViewSet(viewsets.ModelViewSet):
     """
-    ##S#W#I#R#L##1#0################################################################
+    ##S#W#I#R#L##1#.#1##############################################################
     API endpoint that allows Results to be viewed or edited
     Use GET to list all objects, POST to create a new one. 
     Add /<id>/ to DELETE, PUT or PATCH objects.
@@ -186,8 +185,16 @@ class ResultViewSet(viewsets.ModelViewSet):
         # end if
         otf_result_mixer = None
         if 'result_mixer' in request.GET.keys():
-            otf_result_mixer = request.GET['result_mixer']
+            otf_result_mixer = str(request.GET['result_mixer'])
         # end if        
+        explain = True
+        if 'explain' in request.GET.keys():
+            explain = str(request.GET['explain'])
+            if explain.lower() == 'false':
+                explain = False
+             # endif
+        # end if
+        # end if
         if search_id:
             # check if the query has ready status
             if Search.objects.filter(id=search_id).exists():
@@ -196,10 +203,10 @@ class ResultViewSet(viewsets.ModelViewSet):
                     try:
                         if otf_result_mixer:
                             # call the specifixed mixer on the fly otf
-                            results = eval(otf_result_mixer)(search.id, search.results_requested, page)
+                            results = eval(otf_result_mixer)(search.id, search.results_requested, page, explain)
                         else:
                             # call the mixer for this search provider
-                            results = eval(search.result_mixer)(search.id, search.results_requested, page)
+                            results = eval(search.result_mixer)(search.id, search.results_requested, page, explain)
                     except NameError as err:
                         message = f'Error: NameError: {err}'
                         logger.error(f'{module_name}: {message}')
@@ -247,7 +254,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    ##S#W#I#R#L##1#0################################################################
+    ##S#W#I#R#L##1#.#1##############################################################
     API endpoint that allows management of Users objects.
     Use GET to list all objects, POST to create a new one. 
     Add /<id>/ to DELETE, PUT or PATCH objects.
@@ -262,7 +269,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class GroupViewSet(viewsets.ModelViewSet):
     """
-    ##S#W#I#R#L##1#0################################################################
+    ##S#W#I#R#L##1#.#1##############################################################
     API endpoint that allows management of Group objects.
     Use GET to list all objects, POST to create a new one. 
     Add /<id>/ to DELETE, PUT or PATCH objects.
