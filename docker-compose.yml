@@ -7,7 +7,6 @@ services:
       - "8000:8000"
     command: >
       sh -c "python swirl.py setup &&
-             python manage.py createsuperuser --email admin@example.com --username admin &&
              python manage.py migrate &&
              python swirl.py stop rabbitmq celery-worker celery-beats &&
              python swirl.py start rabbitmq celery-worker celery-beats &&
